@@ -1,0 +1,23 @@
+.card-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-modal input,
+.card-modal select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #0f3460;
+  background-color: #1a1a2e;
+  color: #fff;
+}
+
+.card-modal button {
+  padding: 8px;
+  background-color: #533483;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
