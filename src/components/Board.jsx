@@ -1,22 +1,26 @@
-import Column from './Column';
-import './Board.css';
+import Card from './Card';
+import './Column.css';
 
-const STATUSES = ['Backlog', 'ToDo', 'Doing', 'Testing', 'Done'];
-
-function Board({ cards, onMove, onDelete }) {
+function Column({ title, cards, onMove, onDelete, onCardClick }) {
   return (
-    <div className="board">
-      {STATUSES.map((status) => (
-        <Column
-          key={status}
-          title={status}
-          cards={cards.filter((card) => card.status === status)}
-          onMove={onMove}
-          onDelete={onDelete}
-        />
-      ))}
+    <div className="column">
+      <h3 className="column__title">
+        {title} ({cards.length})
+      </h3>
+
+      <div className="column__cards">
+        {cards.map((card) => (
+          <Card
+            key={card.id}
+            card={card}
+            onMove={onMove}
+            onDelete={onDelete}
+            onClick={onCardClick}
+          />
+        ))}
+      </div>
     </div>
   );
 }
 
-export default Board;
+export default Column;

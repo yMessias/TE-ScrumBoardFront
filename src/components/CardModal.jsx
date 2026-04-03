@@ -32,7 +32,7 @@ function CardModal({ onSubmit, card, onClose }) {
 
   return (
     <form className="card-modal" onSubmit={handleSubmit}>
-      <h3>{card ? 'Editar Card' : 'Novo Card'}</h3>
+      
 
       <input
         type="text"

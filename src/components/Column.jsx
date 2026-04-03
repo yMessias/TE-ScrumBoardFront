@@ -1,10 +1,13 @@
 import Card from './Card';
 import './Column.css';
 
-function Column({ title, cards, onMove, onDelete }) {
+function Column({ title, cards, onMove, onDelete, onCardClick }) {
   return (
     <div className="column">
-      <h3 className="column__title">{title}</h3>
+      <h3 className="column__title">
+        {title} ({cards.length})
+      </h3>
+
       <div className="column__cards">
         {cards.map((card) => (
           <Card
@@ -12,11 +15,9 @@ function Column({ title, cards, onMove, onDelete }) {
             card={card}
             onMove={onMove}
             onDelete={onDelete}
+            onClick={onCardClick}
           />
         ))}
-        {cards.length === 0 && (
-          <p className="column__empty">Nenhum card</p>
-        )}
       </div>
     </div>
   );
