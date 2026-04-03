@@ -1,97 +1,112 @@
 import { useState, useEffect } from 'react';
 import Board from './components/Board';
-import Modal from './components/Modal';
 import CardModal from './components/CardModal';
-import { getCards, createCard, moveCard, deleteCard } from './services/api';
+import { getCards, createCard, updateCard, moveCard, deleteCard } from './services/api';
 import './App.css';
 
 function App() {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedCard, setSelectedCard] = useState(null);
+  const [error, setError] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingCard, setEditingCard] = useState(null);
 
   const fetchCards = async () => {
-    const data = await getCards();
-    setCards(data);
-    setLoading(false);
+    try {
+      setError(null);
+      const data = await getCards();
+      setCards(data);
+    } catch (err) {
+      setError('Erro ao carregar cards. Verifique se o backend está rodando.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchCards();
   }, []);
 
-  const handleCreate = async (cardData) => {
-    const created = await createCard(cardData);
-    setCards((prev) => [...prev, created]);
+  const handleOpenCreate = () => {
+    setEditingCard(null);
+    setModalOpen(true);
   };
 
-  const handleMove = async (id, status) => {
-    const updated = await moveCard(id, status);
-    setCards((prev) =>
-      prev.map((c) => (c.id === updated.id ? updated : c))
-    );
+  const handleEdit = (card) => {
+    setEditingCard(card);
+    setModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    await deleteCard(id);
-    setCards((prev) => prev.filter((c) => c.id !== id));
-  };
-
-  const handleCardClick = (card) => {
-    setSelectedCard(card);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedCard(null);
-    setIsModalOpen(false);
-  };
-
-  const handleSubmit = async (data) => {
-    if (selectedCard) {
-      const updated = {
-        ...selectedCard,
-        ...data,
-      };
-
-      setCards((prev) =>
-        prev.map((c) => (c.id === selectedCard.id ? updated : c))
-      );
-    } else {
-      await handleCreate(data);
+  const handleSave = async (cardData) => {
+    try {
+      if (editingCard) {
+        const updated = await updateCard(editingCard.id, cardData);
+        setCards((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+      } else {
+        const created = await createCard(cardData);
+        setCards((prev) => [...prev, created]);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao salvar card.');
     }
   };
 
-  if (loading) return <p>Carregando...</p>;
+  const handleMove = async (id, newStatus) => {
+    try {
+      const updated = await moveCard(id, newStatus);
+      setCards((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao mover card.');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteCard(id);
+      setCards((prev) => prev.filter((c) => c.id !== id));
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao deletar card.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="app">
+        <div className="app__loading">Carregando board...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="app">
-      <h1>Scrum Board</h1>
+      <header className="app__header">
+        <h1>Scrum Board</h1>
+        <p>Arraste cards entre colunas para organizar suas tarefas</p>
+      </header>
 
-      <button onClick={() => setIsModalOpen(true)}>
-        Novo Card
-      </button>
+      {error && <div className="app__error">{error}</div>}
 
       <Board
         cards={cards}
-        onMove={handleMove}
+        onEdit={handleEdit}
         onDelete={handleDelete}
-        onCardClick={handleCardClick}
+        onMove={handleMove}
       />
 
-      <Modal
-  isOpen={isModalOpen}
-  onClose={handleCloseModal}
-  title={selectedCard ? 'Editar Card' : 'Novo Card'}
->
-  <CardModal
-    card={selectedCard}
-    onSubmit={handleSubmit}
-    onClose={handleCloseModal}
-  />
-</Modal>
+      <button className="fab" onClick={handleOpenCreate} title="Novo Card">
+        +
+      </button>
+
+      <CardModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSave}
+        editingCard={editingCard}
+      />
     </div>
   );
 }
