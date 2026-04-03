@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
+import Modal from './Modal';
 import './CardModal.css';
 
-function CardModal({ onSubmit, card, onClose }) {
+function CardModal({ isOpen, onClose, onSave, editingCard }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [assignee, setAssignee] = useState('');
@@ -9,71 +10,109 @@ function CardModal({ onSubmit, card, onClose }) {
   const [status, setStatus] = useState('Backlog');
 
   useEffect(() => {
-    if (card) {
-      setTitle(card.title);
-      setDescription(card.description);
-      setAssignee(card.assignee);
-      setPriority(card.priority);
-      setStatus(card.status);
+    if (isOpen) {
+      if (editingCard) {
+        setTitle(editingCard.title);
+        setDescription(editingCard.description);
+        setAssignee(editingCard.assignee);
+        setPriority(editingCard.priority);
+        setStatus(editingCard.status);
+      } else {
+        setTitle('');
+        setDescription('');
+        setAssignee('');
+        setPriority('Medium');
+        setStatus('Backlog');
+      }
     }
-  }, [card]);
+  }, [isOpen, editingCard]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (!title.trim()) {
       alert('Título é obrigatório!');
       return;
     }
-
-    onSubmit({ title, description, assignee, priority, status });
+    onSave({ title, description, assignee, priority, status });
     onClose();
   };
 
+  const isEditing = !!editingCard;
+
   return (
-    <form className="card-modal" onSubmit={handleSubmit}>
-      <h3>{card ? 'Editar Card' : 'Novo Card'}</h3>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isEditing ? 'Editar Card' : 'Novo Card'}
+    >
+      <form className="card-modal-form" onSubmit={handleSubmit}>
+        <label className="card-modal-form__label">
+          Título *
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="card-modal-form__input"
+            autoFocus
+          />
+        </label>
 
-      <input
-        type="text"
-        placeholder="Título"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+        <label className="card-modal-form__label">
+          Descrição
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="card-modal-form__textarea"
+            rows={3}
+          />
+        </label>
 
-      <input
-        type="text"
-        placeholder="Descrição"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
+        <label className="card-modal-form__label">
+          Responsável
+          <input
+            type="text"
+            value={assignee}
+            onChange={(e) => setAssignee(e.target.value)}
+            className="card-modal-form__input"
+          />
+        </label>
 
-      <input
-        type="text"
-        placeholder="Responsável"
-        value={assignee}
-        onChange={(e) => setAssignee(e.target.value)}
-      />
+        <div className="card-modal-form__row">
+          <label className="card-modal-form__label">
+            Prioridade
+            <select
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+              className="card-modal-form__select"
+            >
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+              <option value="Urgent">Urgent</option>
+            </select>
+          </label>
 
-      <select value={priority} onChange={(e) => setPriority(e.target.value)}>
-        <option value="Low">Low</option>
-        <option value="Medium">Medium</option>
-        <option value="High">High</option>
-        <option value="Urgent">Urgent</option>
-      </select>
+          <label className="card-modal-form__label">
+            Status
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="card-modal-form__select"
+            >
+              <option value="Backlog">Backlog</option>
+              <option value="ToDo">ToDo</option>
+              <option value="Doing">Doing</option>
+              <option value="Testing">Testing</option>
+              <option value="Done">Done</option>
+            </select>
+          </label>
+        </div>
 
-      <select value={status} onChange={(e) => setStatus(e.target.value)}>
-        <option value="Backlog">Backlog</option>
-        <option value="ToDo">ToDo</option>
-        <option value="Doing">Doing</option>
-        <option value="Testing">Testing</option>
-        <option value="Done">Done</option>
-      </select>
-
-      <button type="submit">
-        {card ? 'Salvar' : 'Criar'}
-      </button>
-    </form>
+        <button type="submit" className="card-modal-form__button">
+          {isEditing ? 'Salvar Alterações' : 'Criar Card'}
+        </button>
+      </form>
+    </Modal>
   );
 }
 

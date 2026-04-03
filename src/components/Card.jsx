@@ -1,20 +1,38 @@
-import './Card.css';
+import { useState } from 'react';
 import PriorityBadge from './PriorityBadge';
+import Avatar from './Avatar';
+import './Card.css';
 
-const STATUSES = ['Backlog', 'ToDo', 'Doing', 'Testing', 'Done'];
+function Card({ card, onEdit, onDelete }) {
+  const [isDragging, setIsDragging] = useState(false);
 
-function Card({ card, onMove, onDelete, onClick }) {
+  const handleDragStart = (e) => {
+    e.dataTransfer.setData('text/plain', card.id);
+    e.dataTransfer.effectAllowed = 'move';
+    setIsDragging(true);
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
   return (
-    <div className="card" onClick={() => onClick(card)}>
+    <div
+      className={`card ${isDragging ? 'card--dragging' : ''}`}
+      draggable="true"
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onClick={() => onEdit(card)}
+    >
       <div className="card__header">
         <h4 className="card__title">{card.title}</h4>
-
         <button
           className="card__delete"
           onClick={(e) => {
             e.stopPropagation();
             onDelete(card.id);
           }}
+          title="Deletar card"
         >
           ×
         </button>
@@ -25,22 +43,12 @@ function Card({ card, onMove, onDelete, onClick }) {
       )}
 
       <div className="card__footer">
-        <span className="card__assignee">{card.assignee}</span>
+        <div className="card__assignee-info">
+          <Avatar name={card.assignee} />
+          <span className="card__assignee">{card.assignee}</span>
+        </div>
         <PriorityBadge priority={card.priority} />
       </div>
-
-      <select
-        className="card__move"
-        value={card.status}
-        onChange={(e) => {
-          e.stopPropagation();
-          onMove(card.id, e.target.value);
-        }}
-      >
-        {STATUSES.map((s) => (
-          <option key={s} value={s}>{s}</option>
-        ))}
-      </select>
     </div>
   );
 }
