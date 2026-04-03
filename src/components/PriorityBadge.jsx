@@ -1,0 +1,11 @@
+import './PriorityBadge.css';
+
+function PriorityBadge({ priority }) {
+  return (
+    <span className={`priority priority--${priority.toLowerCase()}`}>
+      {priority}
+    </span>
+  );
+}
+
+export default PriorityBadge;
