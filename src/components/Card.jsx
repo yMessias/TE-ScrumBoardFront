@@ -1,16 +1,20 @@
 import './Card.css';
+import PriorityBadge from './PriorityBadge';
 
 const STATUSES = ['Backlog', 'ToDo', 'Doing', 'Testing', 'Done'];
 
-function Card({ card, onMove, onDelete }) {
+function Card({ card, onMove, onDelete, onClick }) {
   return (
-    <div className="card">
+    <div className="card" onClick={() => onClick(card)}>
       <div className="card__header">
         <h4 className="card__title">{card.title}</h4>
+
         <button
           className="card__delete"
-          onClick={() => onDelete(card.id)}
-          title="Deletar card"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(card.id);
+          }}
         >
           ×
         </button>
@@ -22,15 +26,16 @@ function Card({ card, onMove, onDelete }) {
 
       <div className="card__footer">
         <span className="card__assignee">{card.assignee}</span>
-        <span className={`card__priority card__priority--${card.priority.toLowerCase()}`}>
-          {card.priority}
-        </span>
+        <PriorityBadge priority={card.priority} />
       </div>
 
       <select
         className="card__move"
         value={card.status}
-        onChange={(e) => onMove(card.id, e.target.value)}
+        onChange={(e) => {
+          e.stopPropagation();
+          onMove(card.id, e.target.value);
+        }}
       >
         {STATUSES.map((s) => (
           <option key={s} value={s}>{s}</option>
