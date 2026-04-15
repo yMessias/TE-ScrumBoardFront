@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL || 'https://te-scrumboardapi.onrender.com';
 
 export async function getCards() {
   const res = await fetch(`${API_URL}/api/cards`);
